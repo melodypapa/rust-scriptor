@@ -3,6 +3,11 @@ rust:
   - stable
   - beta
   - nightly
-matrix:
+jobs:
   allow_failures:
-  - rust: nightly
+    - rust: nightly
+  fast_finish: true
+
+script:
+  - cargo build --verbose --workspace
+  - cargo test --verbose --workspace
