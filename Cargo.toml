@@ -2,8 +2,14 @@
 name = "rust-scriptor"
 version = "0.1.0"
 edition = "2021"
+default-run = "y2s"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-assert_cmd = "1"
+assert_cmd = "*"
+clap = "~2"
+log = "*"
+env_logger = "*"
+
+[dev-dependencies]
