@@ -2,6 +2,12 @@
 name = "rust-scriptor"
 version = "0.1.0"
 edition = "2021"
+description = "EB scriptor XML generator"
+authors = ["Melodypapa <melodypapa@outlook.com>"]
+homepage = "https://github.com/melodypapa/rust-scriptor"
+readme = "README.md"
+license = "MIT"
+keywords = ["EB", "scriptor", "Tresos Studio"]
 default-run = "y2s"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
