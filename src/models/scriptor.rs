@@ -1,6 +1,3 @@
-use std::result;
-
-
 
 //const ELEMENT_DESC:String = "Description";
 #[derive(Debug)]
@@ -14,10 +11,6 @@ impl ScriptorDoc {
         ScriptorDoc {name: String::from(name), desc: String::from(desc)}
     }
 
-    pub fn to_string() -> String {
-        let mut result = Vec!<String>();
-        result.
-    }
 }
 
 
