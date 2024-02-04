@@ -8,7 +8,8 @@ homepage = "https://github.com/melodypapa/rust-scriptor"
 readme = "README.md"
 license = "MIT"
 keywords = ["EB", "scriptor", "Tresos Studio"]
-default-run = "y2s"
+#default-run = "y2s"
+default-run = "rust-scriptor"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
