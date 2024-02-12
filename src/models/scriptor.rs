@@ -1,3 +1,4 @@
+use core::fmt;
 use std::fs::File;
 
 use xml::{writer::XmlEvent, EmitterConfig, EventWriter};
@@ -5,6 +6,36 @@ use xml::{writer::XmlEvent, EmitterConfig, EventWriter};
 const ELEMENT_NAME: &str = "Name";
 const ELEMENT_DESC: &str = "Description";
 const ELEMENT_EXPRESSION: &str = "Expression";
+const ELEMENT_OPERATIONS: &str = "Operations";
+const ELEMENT_OPERATION: &str = "Operation";
+
+pub enum OperationType {
+    Condition,
+    ForEach,
+    Add,
+    Remove,
+    SetValue,
+    SetEnabled,
+}
+
+impl fmt::Display for OperationType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            OperationType::Add => write!(f, "Add"),
+            OperationType::Condition => write!(f, "Condition"),
+            OperationType::ForEach => write!(f, "ForEach"),
+            OperationType::Remove => write!(f, "Remove"),
+            OperationType::SetValue => write!(f, "SetValue"),
+            OperationType::SetEnabled => write!(f, "SetEnabled"),
+        }
+    }
+}
+
+pub struct Operation {
+    op_type: OperationType,
+    expression: &'static str,
+    operations: Vec<Operation>,
+}
 
 pub struct ScriptorDoc {
     name: &'static str,
@@ -12,6 +43,81 @@ pub struct ScriptorDoc {
     module: &'static str,
     headings: Vec<&'static str>,
     operations: Vec<Operation>,
+}
+
+pub trait Operable {
+    fn new_op(&mut self, op_type: OperationType, expression: &'static str) -> &Operation;
+
+    fn get_op_list(&self) -> &Vec<Operation>;
+
+    fn condition_op(&mut self, expression: &'static str) -> &Operation {
+        self.new_op(OperationType::Condition, expression)
+    }
+
+    fn for_each_op(&mut self, expression: &'static str) -> &Operation {
+        self.new_op(OperationType::ForEach, expression)
+    }
+
+    fn add_op(&mut self, expression: &'static str) -> &Operation {
+        self.new_op(OperationType::Add, expression)
+    }
+
+    fn remove_op(&mut self, expression: &'static str) -> &Operation {
+        self.new_op(OperationType::Remove, expression)
+    }
+
+    fn set_value_op(&mut self, expression: &'static str) -> &Operation {
+        self.new_op(OperationType::SetValue, expression)
+    }
+
+    fn set_enable_op(&mut self, enabled: bool) -> &Operation {
+        if enabled {}
+        self.new_op(
+            OperationType::SetEnabled,
+            if enabled { "boolean(1)" } else { "boolean(0)" },
+        )
+    }
+}
+
+impl Operable for Operation {
+    fn new_op(&mut self, op_type: OperationType, expression: &'static str) -> &Operation {
+        let op = Operation::new(op_type, expression);
+        self.operations.push(op);
+        self.operations.last().unwrap()
+    }
+
+    fn get_op_list(&self) -> &Vec<Operation> {
+        &self.operations
+    }
+}
+
+impl Operation {
+    fn new(op_type: OperationType, expression: &'static str) -> Self {
+        Self {
+            op_type,
+            expression,
+            operations: Vec::new(),
+        }
+    }
+}
+
+impl fmt::Display for ScriptorDoc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
+impl Operable for ScriptorDoc {
+    fn new_op(&mut self, op_type: OperationType, expression: &'static str) -> &Operation {
+        let op = Operation::new(op_type, expression);
+        self.operations.push(op);
+
+        self.operations.last().unwrap()
+    }
+
+    fn get_op_list(&self) -> &Vec<Operation> {
+        &self.operations
+    }
 }
 
 impl ScriptorDoc {
@@ -50,14 +156,49 @@ impl ScriptorDoc {
             .expect("XML failure: cannot write end element");
     }
 
+    fn write_operation_tag(&self, writer: &mut EventWriter<File>, operation: &Operation) {
+        writer
+            .write(
+                XmlEvent::start_element(ELEMENT_OPERATION)
+                    .attr("Type", operation.op_type.to_string().as_str()),
+            )
+            .expect(&format!(
+                "cannot write the start element of {}",
+                ELEMENT_OPERATION
+            ));
+        self.write_element(writer, ELEMENT_EXPRESSION, operation.expression);
+        writer.write(XmlEvent::end_element()).expect(&format!(
+            "cannot write the end element of {}",
+            ELEMENT_OPERATION
+        ));
+    }
+
     fn write_scriptor_head(&self, writer: &mut EventWriter<File>) {
         self.write_element(writer, ELEMENT_NAME, self.name);
         self.write_element(writer, ELEMENT_DESC, self.desc);
         self.write_element(
             writer,
             ELEMENT_EXPRESSION,
-            format!("as:modconf('{}')", self.module).as_str(),
+            &format!("as:modconf('{}')", self.module)[..],
         );
+
+        if self.get_op_list().len() > 0 {
+            writer
+                .write(XmlEvent::start_element(ELEMENT_OPERATIONS))
+                .expect(&format!(
+                    "XML failure: cannot write start element of {}",
+                    ELEMENT_OPERATIONS
+                ));
+
+            for operation in self.get_op_list() {
+                self.write_operation_tag(writer, &operation);
+            }
+
+            writer.write(XmlEvent::end_element()).expect(&format!(
+                "XML failure: cannot write end element of {}",
+                ELEMENT_OPERATIONS
+            ));
+        }
     }
 
     fn write_document(&self, writer: &mut EventWriter<File>) {
@@ -74,7 +215,7 @@ impl ScriptorDoc {
     }
 
     pub fn write_xml(&self, filename: &str) {
-        let fs = File::create(filename).expect(format!("Cannot create {}", filename).as_str());
+        let fs = File::create(filename).expect(&format!("Cannot create {}", filename)[..]);
 
         let mut writer: EventWriter<File> =
             EmitterConfig::new().perform_indent(true).create_writer(fs);
@@ -84,7 +225,7 @@ impl ScriptorDoc {
         //let element = XmlEvent::start_element("a:hello").attr("a:param", "value").ns("a", "urn:some:document");
     }
 
-    pub fn to_string(&self) -> String {
+    fn to_string(&self) -> String {
         let mut lines: Vec<String> = Vec::new();
 
         lines.push(format!("Name: {}", self.name));
@@ -97,40 +238,6 @@ impl ScriptorDoc {
         }
 
         lines.join("\n")
-    }
-}
-
-pub enum OperationType {
-    Condition,
-    ForEach,
-    Add,
-    Remove,
-    SetValue,
-    SetEnabled,
-    Document(ScriptorDoc),
-}
-
-pub struct Operation {
-    op_type: OperationType,
-    expression: &'static str,
-    operations: Vec<Operation>,
-}
-
-impl Operation {
-    pub fn new(op_type: OperationType, expression: &'static str) -> Self {
-        Self {
-            op_type,
-            expression,
-            operations: Vec::new(),
-        }
-    }
-
-    pub fn condition_op(expression: &'static str) -> Self {
-        Self::new(OperationType::Condition, expression)
-    }
-
-    pub fn for_each_op(expression: &'static str) -> Self {
-        Self::new(OperationType::ForEach, expression)
     }
 }
 
