@@ -1,0 +1,120 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'rust-scriptor'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "rust-scriptor",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'rust-scriptor'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=rust-scriptor",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "rust-scriptor",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'rust-scriptor'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=rust-scriptor",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "rust-scriptor",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'y2s'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=y2s",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "y2s",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'y2s'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=y2s",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "y2s",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'y2s_test'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=y2s_test",
+                    "--package=rust-scriptor"
+                ],
+                "filter": {
+                    "name": "y2s_test",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
