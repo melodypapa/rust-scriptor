@@ -1,5 +1,5 @@
 use rust_scriptor::scriptor;
-use rust_scriptor::scriptor::Operable;
+use rust_scriptor::Operable;
 
 fn main() {
     let mut doc = scriptor::ScriptorDoc::new("test", "this is a test", "module");

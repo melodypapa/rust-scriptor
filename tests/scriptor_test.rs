@@ -1,4 +1,4 @@
-use rust_scriptor::scriptor::OperationType;
+use rust_scriptor::OperationType;
 
 #[test]
 fn operation_type_to_string() {
